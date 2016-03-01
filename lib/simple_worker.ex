@@ -17,13 +17,19 @@ defmodule SimpleTCP.Worker do
     # Accept a TCP connection
     client = Socket.TCP.accept!(server)
 
-    # Start our sending process.
-    {:ok, _pid} = SimpleTCP.Sender.start_link(client)
     # Start our listening process in another process so it doesn't block
-    spawn(fn() -> listen_for_msg(client) end)
+    spawn(fn() -> init_listener(client) end)
 
     # Get the next connection
     loop_connection(server)
+  end
+
+  def init_listener(client) do
+
+    # Start our sending process.
+    {:ok, _pid} = SimpleTCP.Sender.start_link(client)
+    listen_for_msg(client)
+
   end
 
   defp listen_for_msg(client) do
@@ -37,6 +43,7 @@ defmodule SimpleTCP.Worker do
       { :error, :closed } -> :ok
       other -> IO.inspect other
     end
+    
   end
 
 end
